@@ -2,14 +2,20 @@
  * @ Author: Samael
  * @ Create Time: 2023-11-02 05:46:19
  * @ Modified by: Samael
- * @ Modified time: 2023-11-02 05:55:04
+ * @ Modified time: 2023-11-03 05:57:09
  * @ Description:
  */
-
-pub struct Task {
-    title: String,
-    description: String,
-    completed: bool,
+ 
+ #[derive(Debug)]
+ #[derive(PartialEq)]
+ pub struct Task {
+     title: String,
+     description: String,
+     completed: bool,
+    }
+    
+pub struct TaskList {
+    tasks: Vec<Task>,
 }
 
 impl Task {
@@ -43,5 +49,62 @@ impl Task {
 
     pub fn set_completed(&mut self, completed: bool) {
         self.completed = completed;
+    }
+}
+
+
+impl TaskList {
+
+    pub fn new() -> TaskList {
+        TaskList {
+            tasks: Vec::new(),
+        }
+    }
+
+    pub fn add_task(&mut self, task: Task) {
+        self.tasks.push(task);
+    }
+
+    pub fn remove_task(&mut self, index: usize) {
+        self.tasks.remove(index);
+    }
+
+    pub fn get_nb_tasks(&self) -> usize {
+        self.tasks.len()
+    }
+
+    pub fn edit_task(&mut self, index: usize, title: String, description: String) {
+        self.tasks[index].set_title(title);
+        self.tasks[index].set_description(description);
+    }
+
+    pub fn get_task_index(&self, index: usize) -> &Task {
+        &self.tasks[index]
+    }
+
+    pub fn get_task_title(&self, title: &str) -> &Task {
+        for task in &self.tasks {
+            if task.get_title() == &title {
+                return task;
+            }
+        }
+        panic!("No task with title: {}", title);
+    }
+
+    pub fn get_task(&self, task: &Task) -> usize {
+        for (index, t) in self.tasks.iter().enumerate() {
+            if t == task {
+                return index;
+            }
+        }
+        panic!("No task with title: {}", task.get_title());
+    }
+
+    pub fn complete_task(&mut self, index: usize) {
+        self.tasks[index].set_completed(true);
+    }
+
+    pub fn uncomplete_task(&mut self, index: usize) {
+        self.tasks[index].set_completed(false);
     }
 }
