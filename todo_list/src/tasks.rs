@@ -2,12 +2,18 @@
  * @ Author: Samael
  * @ Create Time: 2023-11-02 05:46:19
  * @ Modified by: Samael
- * @ Modified time: 2023-11-03 05:57:09
+ * @ Modified time: 2023-11-06 06:39:11
  * @ Description:
  */
- 
- #[derive(Debug)]
- #[derive(PartialEq)]
+
+use serde::{Deserialize, Serialize};
+use std::fs::File;
+use std::io::prelude::*;
+use std::path::Path;
+use std::fs::OpenOptions;
+
+#[derive(PartialEq)]
+#[derive(Debug, Serialize, Deserialize)]
  pub struct Task {
      title: String,
      description: String,
@@ -16,6 +22,7 @@
     
 pub struct TaskList {
     tasks: Vec<Task>,
+    data_path: String,
 }
 
 impl Task {
@@ -58,6 +65,7 @@ impl TaskList {
     pub fn new() -> TaskList {
         TaskList {
             tasks: Vec::new(),
+            data_path: String::from("./data.db"),
         }
     }
 
@@ -106,5 +114,32 @@ impl TaskList {
 
     pub fn uncomplete_task(&mut self, index: usize) {
         self.tasks[index].set_completed(false);
+    }
+
+    pub fn load_tasks(&mut self) -> std::io::Result<()> {
+        let file_path = Path::new(&self.data_path);
+        if file_path.exists() {
+            let file = File::open(&file_path)?;
+            
+            let tasks: Vec<Task> = serde_json::from_reader(file)?;
+            println!("Tasks loaded: {:?}", tasks);
+            self.tasks = tasks;
+        } else {
+            // If the file doesn't exist, create an empty task list.
+            self.tasks = Vec::new();
+        }
+
+        Ok(())
+    }
+
+    pub fn save_tasks(&self) -> std::io::Result<()> {
+        let file = OpenOptions::new()
+            .write(true)
+            .truncate(true)
+            .open(&self.data_path)?;
+
+        serde_json::to_writer(file, &self.tasks)?;
+
+        Ok(())
     }
 }
